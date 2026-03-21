@@ -29,6 +29,19 @@ impl KaslNode {
         // Parse, build and compile the source codes
         self.compiler.parse(code).map_err(|e| vec![*e])?;
         let blueprint = self.compiler.build()?;
+
+        // Allocate the state memory based of the blueprint
+        for state_item in blueprint.get_states() {
+            let layout = std::alloc::Layout::from_size_align(
+                state_item.actual_size,
+                state_item.align as usize,
+            )
+            .unwrap();
+            let ptr = unsafe { std::alloc::alloc_zeroed(layout) as *mut () };
+            self.states.push(ptr);
+        }
+
+        // Compile the program
         self.compiler.compile_buffer(&blueprint)?;
 
         // Set the blueprint
