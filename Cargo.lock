@@ -550,7 +550,7 @@ dependencies = [
 [[package]]
 name = "knodiq_engine"
 version = "0.3.10"
-source = "git+https://github.com/hatya-mouse/knodiq_engine?branch=refactor#ddadbb3dfd8187a9783356e1a20a053564343304"
+source = "git+https://github.com/hatya-mouse/knodiq_engine?branch=refactor#40e6e7c6a5de93ab1d2256cf711e68a3469f757a"
 dependencies = [
  "cpal",
 ]
