@@ -7,6 +7,9 @@ pub struct KaslNode {
     compiler: KaslCompiler,
     blueprint: Option<IOBlueprint>,
     search_paths: Vec<String>,
+
+    states: Vec<*mut ()>,
+    is_first_process: bool,
 }
 
 impl KaslNode {
@@ -35,7 +38,9 @@ impl KaslNode {
 }
 
 impl Node for KaslNode {
-    fn prepare(&mut self, _audio_ctx: &knodiq_engine::audio_context::AudioContext) {}
+    fn prepare(&mut self, _audio_ctx: &knodiq_engine::audio_context::AudioContext) {
+        self.is_first_process = true;
+    }
 
     fn process(
         &mut self,
@@ -43,5 +48,20 @@ impl Node for KaslNode {
         outputs: &[*mut u8],
         audio_ctx: &knodiq_engine::audio_context::AudioContext,
     ) {
+        let inputs: Vec<*const ()> = inputs.iter().map(|p| *p as *const ()).collect();
+        let outputs: Vec<*mut ()> = outputs.iter().map(|p| *p as *mut ()).collect();
+
+        match self.compiler.run_buffer(
+            &inputs,
+            &outputs,
+            &self.states,
+            if self.is_first_process { 1 } else { 0 },
+            audio_ctx.buffer_size as i32,
+        ) {
+            Ok(()) => (),
+            Err(err) => eprintln!("An error occured while processing KaslNode: {}", err),
+        };
+
+        self.is_first_process = false;
     }
 }
