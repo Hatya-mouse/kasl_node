@@ -4,3 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+kasl = { git = "https://github.com/hatya-mouse/kasl" }
+knodiq_engine = { git = "https://github.com/hatya-mouse/knodiq_engine", branch = "refactor" }
