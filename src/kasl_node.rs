@@ -65,3 +65,5 @@ impl Node for KaslNode {
         self.is_first_process = false;
     }
 }
+
+unsafe impl Send for KaslNode {}
