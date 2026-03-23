@@ -1,5 +1,8 @@
 use kasl::{KaslCompiler, scope_manager::IOBlueprint};
-use knodiq_engine::{audio_context::AudioContext, node::Node, type_registry::TypeInfo};
+use knodiq_engine::{
+    data_types::{AudioContext, TypeInfo},
+    node::Node,
+};
 use std::path::PathBuf;
 
 #[derive(Default)]
@@ -141,7 +144,7 @@ impl Node for KaslNode {
 
     fn update(&mut self, _audio_ctx: &AudioContext) {}
 
-    fn prepare(&mut self, _audio_ctx: &AudioContext) {
+    fn prepare(&mut self) {
         self.is_first_process = true;
     }
 
