@@ -149,16 +149,16 @@ impl Node for KaslNode {
         let inputs: Vec<*const ()> = inputs.iter().map(|p| *p as *const ()).collect();
         let outputs: Vec<*mut ()> = outputs.iter().map(|p| *p as *mut ()).collect();
 
-        match self.compiler.run_buffer(
-            &inputs,
-            &outputs,
-            &self.states,
-            if self.is_first_process { 1 } else { 0 },
-            audio_ctx.buffer_size as i32,
-        ) {
-            Ok(()) => (),
-            Err(err) => eprintln!("An error occured while processing KaslNode: {}", err),
-        };
+        // match self.compiler.run_buffer(
+        //     &inputs,
+        //     &outputs,
+        //     &self.states,
+        //     if self.is_first_process { 1 } else { 0 },
+        //     audio_ctx.buffer_size as i32,
+        // ) {
+        //     Ok(()) => (),
+        //     Err(err) => eprintln!("An error occured while processing KaslNode: {}", err),
+        // };
 
         self.is_first_process = false;
     }
