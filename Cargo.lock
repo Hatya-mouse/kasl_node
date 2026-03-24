@@ -578,7 +578,7 @@ dependencies = [
 [[package]]
 name = "knodiq_engine"
 version = "0.3.10"
-source = "git+https://github.com/hatya-mouse/knodiq_engine?branch=refactor#a150235574e2765453c07def5ff6f35e6dafe621"
+source = "git+https://github.com/hatya-mouse/knodiq_engine?branch=refactor#4eaf9f17e99f913476aa56f28e202670088aba21"
 dependencies = [
  "cpal",
  "wide",
@@ -1100,9 +1100,9 @@ dependencies = [
 
 [[package]]
 name = "toml_edit"
-version = "0.25.7+spec-1.1.0"
+version = "0.25.8+spec-1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d15b06e6c39068c203e7c1d0bc3944796d867449e7668ef7fa5ea43727cb846e"
+checksum = "16bff38f1d86c47f9ff0647e6838d7bb362522bdf44006c7068c2b1e606f1f3c"
 dependencies = [
  "indexmap",
  "toml_datetime",
