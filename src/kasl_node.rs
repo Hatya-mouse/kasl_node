@@ -94,6 +94,10 @@ impl KaslNode {
 }
 
 impl Node for KaslNode {
+    fn clone_box(&self) -> Box<dyn Node> {
+        Box::new(self.clone())
+    }
+
     fn get_input_names(&self) -> Vec<String> {
         self.blueprint
             .as_ref()
@@ -164,6 +168,21 @@ impl Node for KaslNode {
         };
 
         self.is_first_process = false;
+    }
+}
+
+impl Clone for KaslNode {
+    fn clone(&self) -> Self {
+        Self {
+            compiler: KaslCompiler::default(),
+            blueprint: None,
+            search_paths: self.search_paths.clone(),
+            code: self.code.clone(),
+            input_types: self.input_types.clone(),
+            output_types: self.output_types.clone(),
+            states: self.states.clone(),
+            is_first_process: false,
+        }
     }
 }
 
