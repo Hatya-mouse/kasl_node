@@ -578,7 +578,7 @@ dependencies = [
 [[package]]
 name = "knodiq_engine"
 version = "0.3.10"
-source = "git+https://github.com/hatya-mouse/knodiq_engine#ca75dbf2f48ff6ee64d79d2cfcf7aa8bf64c0ed2"
+source = "git+https://github.com/hatya-mouse/knodiq_engine#cfc8e4d20c5eb5e549ff45f8354c2dc05b789cfb"
 dependencies = [
  "cpal",
  "ringbuf",
