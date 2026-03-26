@@ -1,4 +1,4 @@
-use kasl::{KaslCompiler, scope_manager::IOBlueprint};
+use kasl::{KaslCompiler, run_program::run_buffer, scope_manager::IOBlueprint};
 use knodiq_engine::{
     data_types::{AudioContext, TypeInfo},
     node::Node,
@@ -16,6 +16,7 @@ pub struct KaslNode {
     output_types: Vec<TypeInfo>,
 
     states: Vec<*mut ()>,
+    program: Option<*const u8>,
     is_first_process: bool,
 }
 
@@ -55,7 +56,7 @@ impl KaslNode {
         }
 
         // Compile the program
-        self.compiler.compile_buffer(&blueprint)?;
+        self.program = Some(self.compiler.compile_buffer(&blueprint)?);
 
         // Set the blueprint
         self.blueprint = Some(blueprint);
@@ -156,16 +157,21 @@ impl Node for KaslNode {
         let inputs: Vec<*const ()> = inputs.iter().map(|p| *p as *const ()).collect();
         let outputs: Vec<*mut ()> = outputs.iter().map(|p| *p as *mut ()).collect();
 
-        match self.compiler.run_buffer(
-            &inputs,
-            &outputs,
-            &self.states,
-            if self.is_first_process { 1 } else { 0 },
-            audio_ctx.buffer_size as i32,
-        ) {
-            Ok(()) => (),
-            Err(err) => eprintln!("An error occured while processing KaslNode: {}", err),
-        };
+        // Return if the program pointer is null
+        if self.program.is_none_or(|program| program.is_null()) {
+            return;
+        }
+
+        unsafe {
+            run_buffer(
+                self.program.unwrap(),
+                &inputs,
+                &outputs,
+                &self.states,
+                if self.is_first_process { 1 } else { 0 },
+                audio_ctx.buffer_size as i32,
+            );
+        }
 
         self.is_first_process = false;
     }
@@ -188,7 +194,8 @@ impl Clone for KaslNode {
             code: self.code.clone(),
             input_types: self.input_types.clone(),
             output_types: self.output_types.clone(),
-            states: self.states.clone(),
+            states: Vec::new(),
+            program: None,
             is_first_process: false,
         }
     }
