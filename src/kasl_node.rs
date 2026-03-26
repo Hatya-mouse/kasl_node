@@ -222,4 +222,23 @@ impl Clone for KaslNode {
     }
 }
 
+impl Drop for KaslNode {
+    fn drop(&mut self) {
+        // De-allocate the allocated states
+        for (ptr, state_item) in self
+            .states
+            .iter()
+            .zip(self.blueprint.iter().flat_map(|b| b.get_states()))
+        {
+            let layout = std::alloc::Layout::from_size_align(
+                state_item.actual_size,
+                state_item.align as usize,
+            )
+            .unwrap();
+            unsafe { std::alloc::dealloc(*ptr as *mut u8, layout) };
+        }
+        self.states.clear();
+    }
+}
+
 unsafe impl Send for KaslNode {}
