@@ -7,7 +7,6 @@ use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct KaslNode {
-    compiler: KaslCompiler,
     blueprint: Option<IOBlueprint>,
     search_paths: Vec<String>,
     code: Option<String>,
@@ -34,15 +33,16 @@ impl KaslNode {
     }
 
     pub fn compile(&mut self) -> Result<(), Vec<kasl::error::ErrorRecord>> {
+        let mut compiler = KaslCompiler::default();
+
         // Add the search paths to the compiler
-        self.compiler
-            .set_search_paths(self.search_paths.iter().map(PathBuf::from).collect());
+        compiler.set_search_paths(self.search_paths.iter().map(PathBuf::from).collect());
 
         // Parse, build and compile the source codes
-        self.compiler
+        compiler
             .parse(self.code.as_ref().unwrap_or(&String::default()))
             .map_err(|e| vec![*e])?;
-        let blueprint = self.compiler.build()?;
+        let blueprint = compiler.build()?;
 
         // Allocate the state memory based of the blueprint
         for state_item in blueprint.get_states() {
@@ -56,7 +56,7 @@ impl KaslNode {
         }
 
         // Compile the program
-        self.program = Some(self.compiler.compile_buffer(&blueprint)?);
+        self.program = Some(compiler.compile_buffer(&blueprint)?);
 
         // Set the blueprint
         self.blueprint = Some(blueprint);
@@ -188,7 +188,6 @@ impl Node for KaslNode {
 impl Clone for KaslNode {
     fn clone(&self) -> Self {
         Self {
-            compiler: KaslCompiler::default(),
             blueprint: None,
             search_paths: self.search_paths.clone(),
             code: self.code.clone(),
