@@ -10,6 +10,7 @@ use crate::KaslNodeError;
 
 #[derive(Default)]
 pub struct KaslNode {
+    compiler: Option<KaslCompiler>,
     blueprint: Option<IOBlueprint>,
     search_paths: Vec<String>,
     code: Option<String>,
@@ -36,8 +37,23 @@ impl KaslNode {
     }
 
     pub fn compile(&mut self) -> Result<(), Vec<ErrorRecord>> {
-        let mut compiler = KaslCompiler::default();
+        // De-allocate the allocated states
+        for (ptr, state_item) in self
+            .states
+            .iter()
+            .zip(self.blueprint.iter().flat_map(|b| b.get_states()))
+        {
+            let layout = std::alloc::Layout::from_size_align(
+                state_item.actual_size,
+                state_item.align as usize,
+            )
+            .unwrap();
+            unsafe { std::alloc::dealloc(*ptr as *mut u8, layout) };
+        }
+        self.states.clear();
 
+        // Create a compiler
+        let mut compiler = KaslCompiler::default();
         // Add the search paths to the compiler
         compiler.set_search_paths(self.search_paths.iter().map(PathBuf::from).collect());
 
@@ -46,6 +62,7 @@ impl KaslNode {
             .parse(self.code.as_ref().unwrap_or(&String::default()))
             .map_err(|e| vec![*e])?;
         let blueprint = compiler.build()?;
+        self.program = Some(compiler.compile_buffer(&blueprint)?);
 
         // Allocate the state memory based of the blueprint
         for state_item in blueprint.get_states() {
@@ -58,12 +75,10 @@ impl KaslNode {
             self.states.push(ptr);
         }
 
-        // Compile the program
-        self.program = Some(compiler.compile_buffer(&blueprint)?);
-
         // Set the blueprint
         self.blueprint = Some(blueprint);
-
+        // Move the compiler to KaslNode to preserve the compiled program until next compile
+        self.compiler = Some(compiler);
         // Update the types
         self.update_type_infos();
 
@@ -194,6 +209,7 @@ impl Node for KaslNode {
 impl Clone for KaslNode {
     fn clone(&self) -> Self {
         Self {
+            compiler: None,
             blueprint: None,
             search_paths: self.search_paths.clone(),
             code: self.code.clone(),
