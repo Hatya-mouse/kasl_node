@@ -1,9 +1,12 @@
-use kasl::{KaslCompiler, run_program::run_buffer, scope_manager::IOBlueprint};
+use kasl::{KaslCompiler, error::ErrorRecord, run_program::run_buffer, scope_manager::IOBlueprint};
 use knodiq_engine::{
     data_types::{AudioContext, TypeInfo},
+    graph::error::NodeError,
     node::Node,
 };
 use std::path::PathBuf;
+
+use crate::KaslNodeError;
 
 #[derive(Default)]
 pub struct KaslNode {
@@ -32,7 +35,7 @@ impl KaslNode {
         self.code = Some(code);
     }
 
-    pub fn compile(&mut self) -> Result<(), Vec<kasl::error::ErrorRecord>> {
+    pub fn compile(&mut self) -> Result<(), Vec<ErrorRecord>> {
         let mut compiler = KaslCompiler::default();
 
         // Add the search paths to the compiler
@@ -149,8 +152,11 @@ impl Node for KaslNode {
 
     fn update(&mut self, _audio_ctx: &AudioContext) {}
 
-    fn prepare(&mut self) {
+    fn prepare(&mut self) -> Result<(), Box<dyn NodeError>> {
         self.is_first_process = true;
+
+        self.compile()
+            .map_err(|records| -> Box<dyn NodeError> { Box::new(KaslNodeError::new(records)) })
     }
 
     fn process(&mut self, inputs: &[*const u8], outputs: &[*mut u8], audio_ctx: &AudioContext) {
