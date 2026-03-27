@@ -64,8 +64,6 @@ impl KaslNode {
         let blueprint = compiler.build()?;
         self.program = Some(compiler.compile_buffer(&blueprint)?);
 
-        println!("{}", compiler.backend.as_ref().unwrap().func());
-
         // Allocate the state memory based of the blueprint
         for state_item in blueprint.get_states() {
             let layout = std::alloc::Layout::from_size_align(
