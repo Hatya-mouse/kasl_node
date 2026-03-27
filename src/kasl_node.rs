@@ -82,6 +82,17 @@ impl KaslNode {
         // Update the types
         self.update_type_infos();
 
+        println!(
+            "{}",
+            self.compiler
+                .as_ref()
+                .unwrap()
+                .backend
+                .as_ref()
+                .unwrap()
+                .func()
+        );
+
         Ok(())
     }
 
