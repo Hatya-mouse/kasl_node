@@ -1,4 +1,4 @@
-use kasl::{KaslCompiler, error::ErrorRecord, run_program::run_buffer, scope_manager::IOBlueprint};
+use kasl::{KaslCompiler, error::ErrorRecord, run_program::run_buffer, ast::scope_manager::IOBlueprint};
 use knodiq_engine::{
     data_types::{AudioContext, TypeInfo},
     graph::error::NodeError,
