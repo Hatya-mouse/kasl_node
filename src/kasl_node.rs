@@ -1,12 +1,14 @@
-use kasl::{KaslCompiler, error::ErrorRecord, run_program::run_buffer, ast::scope_manager::IOBlueprint};
+use crate::KaslNodeError;
+use kasl::{
+    core::{KaslCompiler, ast::scope_manager::IOBlueprint, error::ErrorRecord, run_buffer},
+    cranelift_backend::CraneliftBackend,
+};
 use knodiq_engine::{
     data_types::{AudioContext, TypeInfo},
     graph::error::NodeError,
     node::Node,
 };
 use std::path::PathBuf;
-
-use crate::KaslNodeError;
 
 #[derive(Default)]
 pub struct KaslNode {
@@ -44,7 +46,7 @@ impl KaslNode {
             .zip(self.blueprint.iter().flat_map(|b| b.get_states()))
         {
             let layout = std::alloc::Layout::from_size_align(
-                state_item.actual_size,
+                state_item.actual_size as usize,
                 state_item.align as usize,
             )
             .unwrap();
@@ -61,13 +63,17 @@ impl KaslNode {
         compiler
             .parse(self.code.as_ref().unwrap_or(&String::default()))
             .map_err(|e| vec![*e])?;
-        let blueprint = compiler.build()?;
-        self.program = Some(compiler.compile_buffer(&blueprint)?);
+        let (blueprint, _) = compiler.build()?;
+        let func = compiler.lower_buffer(&blueprint).map_err(|err| vec![err])?;
+
+        // Compile the program to executable binary
+        let mut backend = CraneliftBackend::default();
+        self.program = Some(backend.compile(func).map_err(|_| vec![])?);
 
         // Allocate the state memory based of the blueprint
         for state_item in blueprint.get_states() {
             let layout = std::alloc::Layout::from_size_align(
-                state_item.actual_size,
+                state_item.actual_size as usize,
                 state_item.align as usize,
             )
             .unwrap();
@@ -94,7 +100,7 @@ impl KaslNode {
                 blueprint
                     .get_inputs()
                     .iter()
-                    .map(|item| TypeInfo::new(item.actual_size, item.align as usize))
+                    .map(|item| TypeInfo::new(item.actual_size as usize, item.align as usize))
                     .collect()
             })
             .unwrap_or_default();
@@ -105,7 +111,7 @@ impl KaslNode {
                 blueprint
                     .get_outputs()
                     .iter()
-                    .map(|item| TypeInfo::new(item.actual_size, item.align as usize))
+                    .map(|item| TypeInfo::new(item.actual_size as usize, item.align as usize))
                     .collect()
             })
             .unwrap_or_default();
@@ -231,7 +237,7 @@ impl Drop for KaslNode {
             .zip(self.blueprint.iter().flat_map(|b| b.get_states()))
         {
             let layout = std::alloc::Layout::from_size_align(
-                state_item.actual_size,
+                state_item.actual_size as usize,
                 state_item.align as usize,
             )
             .unwrap();
