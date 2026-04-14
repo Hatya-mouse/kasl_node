@@ -38,7 +38,7 @@ impl KaslNode {
         self.code = Some(code);
     }
 
-    pub fn get_node(&self) -> Option<&String> {
+    pub fn get_code(&self) -> Option<&String> {
         self.code.as_ref()
     }
 
