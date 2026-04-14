@@ -1,8 +1,8 @@
 [package]
 name = "kasl_node"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 
 [dependencies]
-kasl = "0.1.2"
+kasl = { version = "0.2.17", features = ["cranelift"] }
 knodiq_engine = { git = "https://github.com/hatya-mouse/knodiq_engine" }
