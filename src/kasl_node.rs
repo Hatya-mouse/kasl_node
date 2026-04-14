@@ -38,6 +38,10 @@ impl KaslNode {
         self.code = Some(code);
     }
 
+    pub fn get_node(&self) -> Option<&String> {
+        self.code.as_ref()
+    }
+
     pub fn compile(&mut self) -> Result<(), Vec<ErrorRecord>> {
         // De-allocate the allocated states
         for (ptr, state_item) in self
