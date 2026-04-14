@@ -214,17 +214,6 @@ impl Node for KaslNode {
     fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
         self
     }
-
-    fn as_bytes(&self) -> Vec<u8> {
-        self.code
-            .as_ref()
-            .map(|code| code.as_bytes().to_vec())
-            .unwrap_or_default()
-    }
-
-    fn load_bytes(&mut self, bytes: &[u8]) {
-        self.code = str::from_utf8(bytes).map(|str| str.to_string()).ok();
-    }
 }
 
 impl Clone for KaslNode {
