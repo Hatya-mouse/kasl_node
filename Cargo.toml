@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 kasl = { version = "0.2.17", features = ["cranelift"] }
-knodiq_engine = { git = "https://github.com/hatya-mouse/knodiq_engine", rev = "8e7f6f4a88f87e3975cfab7ba371cfbe752ecef7" }
+knodiq_engine = { git = "https://github.com/hatya-mouse/knodiq_engine" }
